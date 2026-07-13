@@ -110,9 +110,14 @@ clg generate
 
 # Auto-commit without interactive prompt
 clg generate -y
+clg generate --yes
 
 # Force heuristic mode (skip AI even if API key exists)
 clg generate -H
+clg generate --heuristic
+
+# Combine flags
+clg generate -y -H              # Auto-commit with heuristic only
 
 # Validate a commit message
 clg lint "feat(api): add user authentication"
@@ -120,9 +125,31 @@ clg lint "feat(api): add user authentication"
 # Install git hook
 clg init
 
-# Remove git hook
+# Remove git hook from current repository
 clg uninstall
+
+# Show version
+clg --version
+clg -V
+
+# Show help
+clg --help
+clg -h
+
+# Show help for specific command
+clg generate --help
+clg lint --help
 ```
+
+#### Interactive Mode Keys
+
+When running `clg generate`, you'll see these options:
+
+- **[Enter]** - Accept the suggested message and commit
+- **[e]** - Edit the message in your editor
+- **[r]** - Regenerate a new suggestion
+- **[m]** - Manual mode (pick type/scope/description step-by-step)
+- **[q]** - Cancel and exit without committing
 
 ## Uninstalling
 
@@ -159,6 +186,23 @@ pnpm dev       # run the CLI directly from source (no build needed)
 pnpm build     # build to dist/
 pnpm test      # run tests
 pnpm lint      # check code style
+```
+
+### Testing
+
+The project includes comprehensive test coverage with 37 tests across:
+
+- **Config loader** - Environment variables, default values, file loading
+- **Linter rules** - Commit parsing, type/scope/length/description validation
+- **Linter validation** - Full message validation, error collection
+- **AI generator** - AI commit generation, error handling
+- **Heuristic generator** - Pattern detection, type/scope inference
+
+Run tests with:
+
+```bash
+pnpm test        # run all tests
+pnpm test --watch  # run tests in watch mode
 ```
 
 ## Contributing
