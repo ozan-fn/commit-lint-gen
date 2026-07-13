@@ -1,11 +1,25 @@
 import { writeFileSync } from 'node:fs';
 import type { SimpleGit } from 'simple-git';
 import { generateHeuristicCommit } from './heuristic.js';
+import { generateAICommit } from './ai.js';
 import { promptCommitAction, editDraft, manualEntry } from './interactive.js';
 import type { Config } from '../config/defaultConfig.js';
 
 function formatMessage(type: string, scope: string | undefined, description: string): string {
     return scope ? `${type}(${scope}): ${description}` : `${type}: ${description}`;
+}
+
+async function generateCommit(git: SimpleGit, config: Config, useAI: boolean) {
+    if (useAI && config.apiKey) {
+        try {
+            const result = await generateAICommit(git, config);
+            return { ...result, confidence: 'high' as const };
+        } catch (error) {
+            console.log(`AI generation failed: ${error instanceof Error ? error.message : String(error)}`)
+        }
+    }
+
+    return await generateHeuristicCommit(git);
 }
 
 /**
@@ -18,7 +32,8 @@ function formatMessage(type: string, scope: string | undefined, description: str
  * only printed to stdout, not written to any file.
  */
 export async function runInteractiveGenerate(git: SimpleGit, config: Config, commitMsgFile?: string): Promise<void> {
-    const initial = await generateHeuristicCommit(git);
+    const useAI = !!config.apiKey;
+    const initial = await generateCommit(git, config, useAI);
     let draft = formatMessage(initial.type, initial.scope, initial.description);
     let confidence: string | undefined = initial.confidence;
 
@@ -45,7 +60,7 @@ export async function runInteractiveGenerate(git: SimpleGit, config: Config, com
         }
 
         if (action === 'regenerate') {
-            const result = await generateHeuristicCommit(git);
+            const result = await generateCommit(git, config, useAI);
             draft = formatMessage(result.type, result.scope, result.description);
             confidence = result.confidence;
             continue;

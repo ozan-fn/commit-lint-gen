@@ -26,22 +26,10 @@ program
   .command('generate')
   .description('Generate a commit message from staged changes')
   .argument('[CommitMsgFile]', 'Commit message file path (Automatically filled by git hook)')
-  // TODO: add option for --heuristic (dan default ke AI) after
-  // generator/ai.ts implemented. For now all request
-  // using heuristic generator.
+  // TODO: add option for --heuristic (dan default ke AI)
   .action(async (commitMsgFile?: string, options?: { heuristic?: boolean }) => {
     try {
-      // Once AI generator is implemented:
-      // if (!options?.heuristic && config.apiKey) {
-      //   await runInteractiveGenerate(git, config, commitMsgFile);
-      // } else {
-      //   fallback to heuristic...
-      // }
-
       await runInteractiveGenerate(git, config, commitMsgFile);
-
-      // For now, just heuristic:
-      const result = await generateHeuristicCommit(git);
     } catch (error) {
       console.error('Error generating commit message:', error);
       process.exit(1);
