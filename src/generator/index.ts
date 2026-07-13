@@ -2,6 +2,7 @@ import { writeFileSync } from 'node:fs';
 import type { SimpleGit } from 'simple-git';
 import { generateHeuristicCommit } from './heuristic.js';
 import { promptCommitAction, editDraft, manualEntry } from './interactive.js';
+import type { Config } from '../config/defaultConfig.js';
 
 function formatMessage(type: string, scope: string | undefined, description: string): string {
     return scope ? `${type}(${scope}): ${description}` : `${type}: ${description}`;
@@ -14,9 +15,9 @@ function formatMessage(type: string, scope: string | undefined, description: str
  * commitMsgFile is filled if called by git hook prepare-commit-msg
  * (git gives file path through first argument). If called manually
  * through `clg generate` without hook, commitMsgFile undefined -> end result
- * only print to stdout, not written to any file.
+ * only printed to stdout, not written to any file.
  */
-export async function runInteractiveGenerate(git: SimpleGit, commitMsgFile?: string): Promise<void> {
+export async function runInteractiveGenerate(git: SimpleGit, config: Config, commitMsgFile?: string): Promise<void> {
     const initial = await generateHeuristicCommit(git);
     let draft = formatMessage(initial.type, initial.scope, initial.description);
     let confidence: string | undefined = initial.confidence;
