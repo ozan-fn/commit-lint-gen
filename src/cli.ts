@@ -8,6 +8,7 @@ import { loadConfig } from './config/loader.js';
 import { runInteractiveGenerate } from './generator/index.js';
 import { validateCommitMessage } from './linter/validate.js';
 import { installGitHook, uninstallGitHook } from './hooks/install.js';
+import { analyzeCommitHistory, formatAnalysisReport } from './audit/analyzer.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const pkg = JSON.parse(readFileSync(join(__dirname, '../package.json'), 'utf-8')) as {
@@ -77,6 +78,30 @@ program
       uninstallGitHook(process.cwd());
     } catch (error) {
       console.error('Error uninstalling git hook:', error);
+      process.exit(1);
+    }
+  });
+
+program
+  .command('audit')
+  .description('Analyze recent commit history for conventional commit compliance')
+  .option('-n, --number <count>', 'Number of commits to analyze', '20')
+  .action(async (options: { number: string }) => {
+    try {
+      const limit = parseInt(options.number, 10);
+      if (isNaN(limit) || limit < 1) {
+        console.error('Error: --number must be a positive integer');
+        process.exit(1);
+      }
+
+      const analyses = await analyzeCommitHistory(git, config, limit);
+      const report = formatAnalysisReport(analyses);
+      console.log(report);
+
+      const hasInvalidCommits = analyses.some(a => !a.isValid);
+      process.exit(hasInvalidCommits ? 1 : 0);
+    } catch (error) {
+      console.error('Error analyzing commit history:', error);
       process.exit(1);
     }
   });
