@@ -2,7 +2,7 @@ import { cosmiconfigSync } from 'cosmiconfig';
 import { config as loadDotenv } from 'dotenv';
 import { defaultConfig, type Config } from './defaultConfig.js';
 
-loadDotenv();
+loadDotenv({ debug: false });
 
 export function loadConfig(): Config {
     const explorer = cosmiconfigSync('commitlintgen');
