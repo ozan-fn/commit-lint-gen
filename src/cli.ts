@@ -9,6 +9,7 @@ import { runInteractiveGenerate } from './generator/index.js';
 import { validateCommitMessage } from './linter/validate.js';
 import { installGitHook, uninstallGitHook } from './hooks/install.js';
 import { analyzeCommitHistory, formatAnalysisReport } from './audit/analyzer.js';
+import { interactiveSetup } from './config/setup.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const pkg = JSON.parse(readFileSync(join(__dirname, '../package.json'), 'utf-8')) as {
@@ -102,6 +103,18 @@ program
       process.exit(hasInvalidCommits ? 1 : 0);
     } catch (error) {
       console.error('Error analyzing commit history:', error);
+      process.exit(1);
+    }
+  });
+
+program
+  .command('config')
+  .description('Interactive setup for AI provider configuration')
+  .action(async () => {
+    try {
+      await interactiveSetup();
+    } catch (error) {
+      console.error('Error during configuration setup:', error);
       process.exit(1);
     }
   });
