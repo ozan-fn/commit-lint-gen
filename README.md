@@ -1,8 +1,8 @@
-# commit-lint-gen
+# commitlg
 
 A CLI tool that lints and generates commit messages following the [Conventional Commits](https://www.conventionalcommits.org/) standard — straight from your staged `git diff`, so you don't have to think about the format every time you commit.
 
-Developers often write lazy commit messages ("fix bug", "update", "wip") because getting the format right takes time and effort. `commit-lint-gen` reads your staged changes and:
+Developers often write lazy commit messages ("fix bug", "update", "wip") because getting the format right takes time and effort. `commitlg` reads your staged changes and:
 
 - **Validates** commit message format before the commit is accepted (linter)
 - **Generates** a draft commit message based on diff analysis (generator), either through simple heuristics or AI
@@ -43,10 +43,33 @@ The result: a consistent, readable commit history that's ready to power automati
 
 ### Installation
 
+**Option 1: Use with npx (always latest, no install needed)**
+
+```bash
+npx commitlg@latest generate
+```
+
+**Option 2: Install globally**
+
+```bash
+# Using npm
+npm install -g commitlg
+
+# Using pnpm
+pnpm install -g commitlg
+
+# Then use directly
+clg generate
+```
+
+**Option 3: Local development**
+
 ```bash
 git clone https://github.com/dhodo999/commit-lint-gen.git
 cd commit-lint-gen
 pnpm install
+pnpm build
+pnpm link --global .
 ```
 
 ### Configuration
@@ -170,7 +193,13 @@ pnpm uninstall
 Or from anywhere:
 
 ```bash
-pnpm unlink --global commit-lint-gen
+# If installed globally
+npm uninstall -g commitlg
+# or
+pnpm uninstall -g commitlg
+
+# If linked from local dev
+pnpm unlink --global commitlg
 ```
 
 **3. Verify:**
