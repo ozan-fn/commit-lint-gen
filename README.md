@@ -130,27 +130,39 @@ The tool supports any OpenAI-compatible API. To use a different provider, adjust
 
 ### Usage
 
-Install the git hook in the repo you want to use it with:
+**Recommended Workflow:**
+
+1. **One-time setup** - Install the validation hook:
 
 ```bash
 cd /path/to/your-project
 clg init
 ```
 
-From there, just commit as usual:
+This installs a `commit-msg` hook that validates all commit messages against conventional commits format.
+
+2. **Generate commits interactively** - Run `clg generate` to create AI-powered commit messages:
 
 ```bash
 git add .
 clg generate
 ```
 
-The tool will automatically generate a draft commit message. Press **Enter** to accept and commit, or use the interactive options:
+The tool generates a draft commit message with an interactive prompt:
 
-- **[Enter]** - Accept and commit
+- **[Enter]** - Accept and commit immediately (no editor)
 - **[e]** - Edit the message
 - **[r]** - Regenerate with a new suggestion
 - **[m]** - Manual mode (pick type/scope/description yourself)
 - **[q]** - Cancel
+
+3. **Or write manually** - The hook validates any commit:
+
+```bash
+git commit -m "feat(api): add user authentication"
+```
+
+If the message doesn't follow conventional commits format, the commit will be rejected with specific error messages.
 
 #### CLI Commands
 
@@ -171,6 +183,11 @@ clg generate -y -H              # Auto-commit with heuristic only
 
 # Validate a commit message
 clg lint "feat(api): add user authentication"
+
+# Analyze recent commit history for conventional commit compliance
+clg audit                       # Analyze last 20 commits (default)
+clg audit -n 50                 # Analyze last 50 commits
+clg audit --number 10           # Analyze last 10 commits
 
 # Install git hook
 clg init
