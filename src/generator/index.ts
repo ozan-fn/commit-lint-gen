@@ -45,7 +45,6 @@ export async function runInteractiveGenerate(git: SimpleGit, config: Config, com
         return;
     }
 
-    // eslint-disable-next-line no-constant-condition
     while (true) {
         const action = await promptCommitAction(draft, confidence);
 

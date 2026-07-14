@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, writeFileSync, chmodSync } from 'node:fs';
+import { existsSync, mkdirSync, writeFileSync, chmodSync, readFileSync, unlinkSync } from 'node:fs';
 import { join } from 'node:path';
 
 export function installGitHook(repoPath: string): void {
@@ -31,7 +31,7 @@ exit $?
 
   try {
     chmodSync(hookPath, 0o755);
-  } catch (error) {
+  } catch {
     // chmod might fail on Windows, but that's okay
   }
 
@@ -49,13 +49,12 @@ export function uninstallGitHook(repoPath: string): void {
     return;
   }
 
-  const fs = require('node:fs');
-  const content = fs.readFileSync(hookPath, 'utf-8');
+  const content = readFileSync(hookPath, 'utf-8');
 
   if (!content.includes('commit-lint-gen hook')) {
     throw new Error('The commit-msg hook was not installed by clg. Please remove it manually if needed.');
   }
 
-  fs.unlinkSync(hookPath);
+  unlinkSync(hookPath);
   console.log('✓ Git hook uninstalled successfully!');
 }

@@ -1,5 +1,5 @@
 import prompts from 'prompts';
-import { writeFileSync, existsSync } from 'node:fs';
+import { writeFileSync, existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import chalk from 'chalk';
 
@@ -91,7 +91,7 @@ export async function interactiveSetup(): Promise<void> {
     try {
         let gitignoreContent = '';
         if (existsSync(gitignorePath)) {
-            gitignoreContent = require('node:fs').readFileSync(gitignorePath, 'utf-8');
+            gitignoreContent = readFileSync(gitignorePath, 'utf-8');
         }
 
         if (!gitignoreContent.includes(gitignoreEntry)) {
@@ -101,7 +101,7 @@ export async function interactiveSetup(): Promise<void> {
             writeFileSync(gitignorePath, newContent);
             console.log(chalk.green('✓ Added .commitlintgenrc.json to .gitignore'));
         }
-    } catch (error) {
+    } catch {
         console.log(chalk.yellow('⚠ Could not update .gitignore. Please add .commitlintgenrc.json manually.'));
     }
 
