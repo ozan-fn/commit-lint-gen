@@ -9,10 +9,10 @@ function formatMessage(type: string, scope: string | undefined, description: str
     return scope ? `${type}(${scope}): ${description}` : `${type}: ${description}`;
 }
 
-async function generateCommit(git: SimpleGit, config: Config, useAI: boolean, forceHeuristic?: boolean) {
+async function generateCommit(git: SimpleGit, config: Config, useAI: boolean, forceHeuristic?: boolean, previousMessage?: string) {
     if (!forceHeuristic && useAI && config.apiKey) {
         try {
-            const result = await generateAICommit(git, config);
+            const result = await generateAICommit(git, config, previousMessage);
             return { ...result, confidence: 'high' as const };
         } catch (error) {
             console.log(`AI generation failed: ${error instanceof Error ? error.message : String(error)}`)
@@ -70,7 +70,11 @@ export async function runInteractiveGenerate(git: SimpleGit, config: Config, com
         }
 
         if (action === 'regenerate') {
-            const result = await generateCommit(git, config, useAI, forceHeuristic);
+            const frames = ['⠋','⠙','⠹','⠸','⠼','⠴','⠦','⠧','⠇','⠏'];
+            let fi = 0;
+            const spinner = setInterval(() => process.stdout.write(`\r${frames[fi++ % frames.length]} Regenerating...`), 80);
+            const result = await generateCommit(git, config, useAI, forceHeuristic, draft);
+            clearInterval(spinner);
             draft = formatMessage(result.type, result.scope, result.description);
             confidence = result.confidence;
             continue;

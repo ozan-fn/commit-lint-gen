@@ -8,7 +8,7 @@ export interface AIResult {
     description: string;
 }
 
-export async function generateAICommit(git: SimpleGit, config: Config): Promise<AIResult> {
+export async function generateAICommit(git: SimpleGit, config: Config, previousMessage?: string): Promise<AIResult> {
     const provider = createAIProvider(config);
 
     const diff = await git.diff(['--cached']);
@@ -30,7 +30,7 @@ Rules:
 - type: One of [feat, fix, docs, style, refactor, test, chore, ci]
 - scope: Optional, the area affected (e.g., "api", "auth", "ui")
 - description: Short imperative phrase (e.g., "add feature" not "added" or "adds")
-
+${previousMessage ? `- Do NOT reuse or slightly rephrase this previous message: "${previousMessage}". Use a different description.` : ''}
 Git diff:
 ${diff.slice(0, 8000)}
 
@@ -43,7 +43,7 @@ Output the JSON object only:`;
         messages: [
             {
                 role: 'system',
-                content: 'You are a JSON API. Respond ONLY with valid JSON. Do not include markdown, explanations, or thinking tags.'
+                content: `You are a JSON API. Respond ONLY with valid JSON. Do not include markdown, explanations, or thinking tags.${previousMessage ? ` IMPORTANT: The previous suggestion was "${previousMessage}". You MUST produce a different type, scope, or description — do not reuse or rephrase it.` : ''}`
             },
             { role: 'user', content: prompt }
         ],

@@ -1,6 +1,7 @@
 import prompts from 'prompts';
-import { writeFileSync, existsSync, readFileSync } from 'node:fs';
+import { writeFileSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
+import { homedir } from 'node:os';
 import chalk from 'chalk';
 
 export async function interactiveSetup(): Promise<void> {
@@ -66,13 +67,13 @@ export async function interactiveSetup(): Promise<void> {
         model: response.model
     };
 
-    const configPath = join(process.cwd(), '.commitlintgenrc.json');
+    const configPath = join(homedir(), '.commitlintgenrc.json');
 
     if (existsSync(configPath)) {
         const overwrite = await prompts({
             type: 'confirm',
             name: 'value',
-            message: 'Config file already exists. Overwrite?',
+            message: 'Global config already exists. Overwrite?',
             initial: false
         });
 
@@ -84,28 +85,7 @@ export async function interactiveSetup(): Promise<void> {
 
     writeFileSync(configPath, JSON.stringify(config, null, 2) + '\n');
 
-    // Add .commitlintgenrc.json to .gitignore if not already present
-    const gitignorePath = join(process.cwd(), '.gitignore');
-    const gitignoreEntry = '.commitlintgenrc.json';
-
-    try {
-        let gitignoreContent = '';
-        if (existsSync(gitignorePath)) {
-            gitignoreContent = readFileSync(gitignorePath, 'utf-8');
-        }
-
-        if (!gitignoreContent.includes(gitignoreEntry)) {
-            const newContent = gitignoreContent.trim()
-                ? `${gitignoreContent.trim()}\n\n# commitlg - ignore config file with API keys\n${gitignoreEntry}\n`
-                : `# commitlg - ignore config file with API keys\n${gitignoreEntry}\n`;
-            writeFileSync(gitignorePath, newContent);
-            console.log(chalk.green('✓ Added .commitlintgenrc.json to .gitignore'));
-        }
-    } catch {
-        console.log(chalk.yellow('⚠ Could not update .gitignore. Please add .commitlintgenrc.json manually.'));
-    }
-
-    console.log(chalk.green('\n✓ Configuration saved to .commitlintgenrc.json'));
+    console.log(chalk.green(`\n✓ Configuration saved to ${configPath}`));
     console.log(chalk.dim('\nYou can now use AI-powered commit generation with:'));
     console.log(chalk.cyan('  clg generate\n'));
 
