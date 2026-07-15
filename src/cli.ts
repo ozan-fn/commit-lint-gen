@@ -35,7 +35,12 @@ program
     try {
       await runInteractiveGenerate(git, config, commitMsgFile, options?.yes, options?.heuristic);
     } catch (error) {
-      console.error('Error generating commit message:', error);
+      const msg = error instanceof Error ? error.message : String(error);
+      if (msg.includes('index.lock')) {
+        console.error('Error: Another git process is running. Delete .git/index.lock and try again.');
+      } else {
+        console.error('Error generating commit message:', error);
+      }
       process.exit(1);
     }
   });

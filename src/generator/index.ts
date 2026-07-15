@@ -33,7 +33,16 @@ async function generateCommit(git: SimpleGit, config: Config, useAI: boolean, fo
  */
 export async function runInteractiveGenerate(git: SimpleGit, config: Config, commitMsgFile?: string, autoYes?: boolean, forceHeuristic?: boolean): Promise<void> {
     const useAI = !!config.apiKey;
+    const frames = ['⠋','⠙','⠹','⠸','⠼','⠴','⠦','⠧','⠇','⠏'];
+    const spin = (msg: string) => {
+        let fi = 0;
+        const id = setInterval(() => process.stdout.write(`\r${frames[fi++ % frames.length]} ${msg}`), 80);
+        return () => { clearInterval(id); process.stdout.write('\r\x1b[K'); };
+    };
+
+    const stopSpin = spin('Generating...');
     const initial = await generateCommit(git, config, useAI, forceHeuristic);
+    stopSpin();
     let draft = formatMessage(initial.type, initial.scope, initial.description);
     let confidence: string | undefined = initial.confidence;
 
@@ -70,11 +79,9 @@ export async function runInteractiveGenerate(git: SimpleGit, config: Config, com
         }
 
         if (action === 'regenerate') {
-            const frames = ['⠋','⠙','⠹','⠸','⠼','⠴','⠦','⠧','⠇','⠏'];
-            let fi = 0;
-            const spinner = setInterval(() => process.stdout.write(`\r${frames[fi++ % frames.length]} Regenerating...`), 80);
+            const stopSpin = spin('Regenerating...');
             const result = await generateCommit(git, config, useAI, forceHeuristic, draft);
-            clearInterval(spinner);
+            stopSpin();
             draft = formatMessage(result.type, result.scope, result.description);
             confidence = result.confidence;
             continue;
